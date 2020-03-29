@@ -11,7 +11,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(inhibit-startup-screen t)
- '(package-selected-packages (quote (nix-mode json-mode)))
+ '(package-selected-packages (quote (markdown-mode nix-mode json-mode)))
  '(vc-follow-symlinks t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -21,6 +21,9 @@
  )
 
 (require 'package)
+;;(add-to-list 'package-archives
+;;             '("melpa" . "https://melpa.org/packages/") t)
+
 (add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/") t)
+             '("melpa" . "https://stable.melpa.org/packages/") t)
 
