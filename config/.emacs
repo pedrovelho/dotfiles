@@ -27,3 +27,6 @@
 (add-to-list 'package-archives
              '("melpa" . "https://stable.melpa.org/packages/") t)
 
+(custom-set-variables
+ '(markdown-command "/run/current-system/sw/bin/pandoc"))
+
