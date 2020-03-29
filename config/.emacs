@@ -28,5 +28,5 @@
              '("melpa" . "https://stable.melpa.org/packages/") t)
 
 (custom-set-variables
- '(markdown-command "/run/current-system/sw/bin/pandoc"))
+ '(markdown-command "/run/current-system/sw/bin/pandoc --metadata pagetitle=\"markdown-preview\" -s -f markdown -t html -c file:///home/pvelho/.emacs.d/github-pandoc.css"))
 
