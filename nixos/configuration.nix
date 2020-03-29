@@ -55,9 +55,11 @@
   environment.systemPackages = with pkgs; [
     zoom-us    
     vim
+
     # nix_utils
     nix-prefetch-scripts
     nix-zsh-completions
+
     # monitoring
     psmisc
     pmutils
@@ -68,12 +70,14 @@
     stress
     tcpdump
     lsof
+
     # files
     file
     tree
     ncdu
     unzip
-    # unrar #NOT FREE need allowUnfree set to true
+    unrar #NOT FREE need allowUnfree set to true
+
     # tools
     zsh
     tmux
@@ -85,10 +89,14 @@
     w3m       # web
     poppler   # PDF
     mediainfo # audio and video
+
     # Gnome stuff
     gnomeExtensions.system-monitor
     gnome3.evolution
     evolution-data-server
+
+    # KDE stuff
+    kdeApplications.spectacle
 
     # Web
     firefox
@@ -163,6 +171,7 @@
     sl
     wesnoth-dev
     docker-compose
+    sshfsFuse
   ];
 
   # Enable docker on boot
@@ -223,12 +232,19 @@
     # Enable the KDE Desktop Environment.
     displayManager.sddm.enable = true;
     desktopManager.plasma5.enable = true;
+    # Enable Gnome Desktop Environment.
+    # displayManager.gdm.enable = true;
+    # desktopManager.gnome3.enable = true;
   };
+
+  users.mutableUsers = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.pvelho = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" "networkmanager" "audio" ]; # Enable ‘sudo’ for the user.
+    description = "Pedro Velho";
+    extraGroups = [ "wheel" "docker" "networkmanager" "audio" "fuse" ];
+    openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC70aw7DXxnBHhtP8u10ozL9I64wXpLBZbpilGBwyNUPOmUrPi72/p7YKhoUbTK9Sti4JnOcew5ats3UHlrtivQR1HeiE49XquMkzmgLSW2EIVHVTooR2evsgPiCxDRMp5p4LIrgiSP4IpjFLEm23XWP5vWeaJDxdCTA3RHIdp0dYld5wZfPqLKRlcxOG7cuN1TDCYdVD7wTu5Eh8EC+zriGpGVAtxUOQyxJLEBa7mSAvzVi9DwnaG06fInFygLevDahz/qX3ZOv2+DkNKegUQe6ge2KmVbpTW+TV2aCMRQahGi4PT++gmim9bIhU4fQbzBw7AfnftWiy5yljdoCfA7 pvelho@lime.home" ];
     shell = pkgs.zsh;
   };
 
