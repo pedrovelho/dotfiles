@@ -11,6 +11,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./vscode.nix
     ];
 
   # UEFI with anti-freeze on Dell XPS 15
@@ -18,6 +19,14 @@
   boot.extraModulePackages = [ pkgs.linuxPackages.nvidia_x11 ];
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.enable = true;
+
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.users.pvelho = {
+    isNormalUser = true;
+    description = "Pedro Velho";
+    extraGroups = [ "wheel" "docker" "networkmanager" "audio" "fuse" ];
+    shell = pkgs.zsh;
+  };
 
   fonts = {
     enableFontDir = true;
@@ -42,7 +51,7 @@
 
   # Select internationalisation properties.
   i18n = {
-     consoleFont = "Fura Code Regular Nerd Font Complete Mon";
+     #consoleFont = "Fura Code Regular Nerd Font Complete Mon";
      consoleKeyMap = "us";
      defaultLocale = "en_US.UTF-8";
   };
@@ -53,8 +62,10 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    zoom-us    
+    zoom-us
     vim
+    gnome3.meld
+    nodejs-12_x
 
     # nix_utils
     nix-prefetch-scripts
@@ -208,6 +219,22 @@
     support32Bit = true;
   }; 
 
+  # Use /etc/nixos/vscode.nix
+  # See https://discourse.nixos.org/t/vscode-extensions-setup/1801/2
+  vscode.user = "pvelho";
+  vscode.homeDir = "/home/pvelho";
+  vscode.extensions = with pkgs.vscode-extensions; [
+    ms-vscode.cpptools
+    bbenoist.Nix
+    ms-python.python
+    ms-azuretools.vscode-docker
+    ms-vscode-remote.remote-ssh
+  ];
+  nixpkgs.latestPackages = [
+    "vscode"
+    "vscode-extensions"
+  ];
+
   hardware.bluetooth.extraConfig = "
     [General]
     Enable=Source,Sink,Media,Socket
@@ -234,19 +261,13 @@
     desktopManager.plasma5.enable = true;
     # Enable Gnome Desktop Environment.
     # displayManager.gdm.enable = true;
-    # desktopManager.gnome3.enable = true;
+    # displayManager.gdm.debug = true;
+    desktopManager.gnome3.enable = true;
+    desktopManager.default = "plasma5";
+    #displayManager.lightdm.enable = true;
   };
 
   users.mutableUsers = true;
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.pvelho = {
-    isNormalUser = true;
-    description = "Pedro Velho";
-    extraGroups = [ "wheel" "docker" "networkmanager" "audio" "fuse" ];
-    openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC70aw7DXxnBHhtP8u10ozL9I64wXpLBZbpilGBwyNUPOmUrPi72/p7YKhoUbTK9Sti4JnOcew5ats3UHlrtivQR1HeiE49XquMkzmgLSW2EIVHVTooR2evsgPiCxDRMp5p4LIrgiSP4IpjFLEm23XWP5vWeaJDxdCTA3RHIdp0dYld5wZfPqLKRlcxOG7cuN1TDCYdVD7wTu5Eh8EC+zriGpGVAtxUOQyxJLEBa7mSAvzVi9DwnaG06fInFygLevDahz/qX3ZOv2+DkNKegUQe6ge2KmVbpTW+TV2aCMRQahGi4PT++gmim9bIhU4fQbzBw7AfnftWiy5yljdoCfA7 pvelho@lime.home" ];
-    shell = pkgs.zsh;
-  };
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
