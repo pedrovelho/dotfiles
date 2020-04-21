@@ -25,6 +25,7 @@
     isNormalUser = true;
     description = "Pedro Velho";
     extraGroups = [ "wheel" "docker" "networkmanager" "audio" "fuse" ];
+    openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC70aw7DXxnBHhtP8u10ozL9I64wXpLBZbpilGBwyNUPOmUrPi72/p7YKhoUbTK9Sti4JnOcew5ats3UHlrtivQR1HeiE49XquMkzmgLSW2EIVHVTooR2evsgPiCxDRMp5p4LIrgiSP4IpjFLEm23XWP5vWeaJDxdCTA3RHIdp0dYld5wZfPqLKRlcxOG7cuN1TDCYdVD7wTu5Eh8EC+zriGpGVAtxUOQyxJLEBa7mSAvzVi9DwnaG06fInFygLevDahz/qX3ZOv2+DkNKegUQe6ge2KmVbpTW+TV2aCMRQahGi4PT++gmim9bIhU4fQbzBw7AfnftWiy5yljdoCfA7 pvelho@lime.home" ];
     shell = pkgs.zsh;
   };
 
@@ -66,7 +67,7 @@
     vim
     gnome3.meld
     nodejs-12_x
-
+    
     # nix_utils
     nix-prefetch-scripts
     nix-zsh-completions
@@ -89,6 +90,19 @@
     unzip
     unrar #NOT FREE need allowUnfree set to true
 
+    # Java
+    maven
+    jdk
+
+
+    bc
+    ffmpeg
+    hping
+    iftop
+    libreoffice
+    qt5.full
+    transmission-gtk
+
     # tools
     zsh
     tmux
@@ -105,7 +119,7 @@
     gnomeExtensions.system-monitor
     gnome3.evolution
     evolution-data-server
-
+    
     # KDE stuff
     kdeApplications.spectacle
 
@@ -228,13 +242,13 @@
     bbenoist.Nix
     ms-python.python
     ms-azuretools.vscode-docker
-    ms-vscode-remote.remote-ssh
+    ms-vscode-remote.remote-ssh    
   ];
   nixpkgs.latestPackages = [
     "vscode"
     "vscode-extensions"
   ];
-
+  
   hardware.bluetooth.extraConfig = "
     [General]
     Enable=Source,Sink,Media,Socket
@@ -260,8 +274,8 @@
     displayManager.sddm.enable = true;
     desktopManager.plasma5.enable = true;
     # Enable Gnome Desktop Environment.
-    # displayManager.gdm.enable = true;
-    # displayManager.gdm.debug = true;
+    #displayManager.gdm.enable = true;
+    #displayManager.gdm.debug = true;
     desktopManager.gnome3.enable = true;
     desktopManager.default = "plasma5";
     #displayManager.lightdm.enable = true;
@@ -273,7 +287,7 @@
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "19.09"; # Did you read the comment?
+  system.stateVersion = "20.03"; # Did you read the comment?
 
 }
 
