@@ -142,3 +142,25 @@ function watcha {
 delpodbyname () {
     delryaxpod `allpods -o json --selector=app=$1 | jq -r '.items[0].metadata.name'`
 }
+
+export NO_AT_BRIDGE=1
+
+ryax-exterminate () {
+    for fbid in `./ryax-cli -o json --server=localhost/api $1 list | jq -r .[].id` ; do
+        ./ryax-cli --server=localhost/api $1 delete $fbid
+    done
+}
+
+ryax-stop-all () {
+    for fbid in `./ryax-cli -o json --server=localhost/api wdeploy list | jq -r .[].id` ; do
+        ./ryax-cli --server=localhost/api wdeploy stop $fbid
+    done
+}
+
+ryax-delete-all () {
+    ryax-stop-all
+    for fbid in "wdeploy" "wdraft" "fb" "fd" "fdeploy" ; do
+        ryax-exterminate $fbid
+    done
+}
+
