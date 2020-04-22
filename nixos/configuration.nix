@@ -29,6 +29,11 @@
     shell = pkgs.zsh;
   };
 
+  users.extraUsers.adisbladis = {
+    shell = pkgs.zsh;
+  };
+  programs.zsh.enable = true;
+
   fonts = {
     enableFontDir = true;
     fonts = with pkgs; [
@@ -51,11 +56,11 @@
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Select internationalisation properties.
-  i18n = {
-     #consoleFont = "Fura Code Regular Nerd Font Complete Mon";
-     consoleKeyMap = "us";
-     defaultLocale = "en_US.UTF-8";
+  console = {
+     font = "Fura Code Regular Nerd Font Complete Mon";
+     keyMap = "us";
   };
+  i18n.defaultLocale = "en_US.UTF-8";
 
   # Set your time zone.
    time.timeZone = "Europe/Amsterdam";
@@ -197,7 +202,11 @@
     wesnoth-dev
     docker-compose
     sshfsFuse
+
+    xorg.xbacklight
   ];
+
+  programs.light.enable = true;
 
   # Enable docker on boot
   virtualisation.docker = {
@@ -228,7 +237,7 @@
   sound.enable = true;
   hardware.pulseaudio = {
     enable = true;
-    extraModules = [ pkgs.pulseaudio-modules-bt ];
+    #extraModules = [ pkgs.pulseaudio-modules-bt ];
     package = pkgs.pulseaudioFull;
     support32Bit = true;
   }; 
@@ -249,11 +258,6 @@
     "vscode-extensions"
   ];
   
-  hardware.bluetooth.extraConfig = "
-    [General]
-    Enable=Source,Sink,Media,Socket
-  ";
-  
   networking.hostName = "fox";
   networking.networkmanager.enable = true;
 
@@ -270,15 +274,12 @@
     xkbOptions = "eurosign:e";
     # Enable touchpad support.
     libinput.enable = true;
-    # Enable the KDE Desktop Environment.
-    displayManager.sddm.enable = true;
-    desktopManager.plasma5.enable = true;
-    # Enable Gnome Desktop Environment.
-    #displayManager.gdm.enable = true;
-    #displayManager.gdm.debug = true;
+    # Enable graphical login and desktop
+    #displayManager.sddm.enable = true;
+    displayManager.gdm.enable = true;
     desktopManager.gnome3.enable = true;
-    desktopManager.default = "plasma5";
-    #displayManager.lightdm.enable = true;
+    #desktopManager.plasma5.enable = true;
+    displayManager.defaultSession = "gnome";
   };
 
   users.mutableUsers = true;
