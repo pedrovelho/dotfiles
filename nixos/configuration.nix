@@ -11,12 +11,9 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./vscode.nix
     ];
 
   # UEFI with anti-freeze on Dell XPS 15
-  boot.blacklistedKernelModules = [ "nouveau" "bbswitch" ];
-  boot.extraModulePackages = [ pkgs.linuxPackages.nvidia_x11 ];
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.enable = true;
 
@@ -204,6 +201,9 @@
     sshfsFuse
 
     xorg.xbacklight
+
+    # MS VisuaCode Studio
+    vscode-extensions
   ];
 
   programs.light.enable = true;
@@ -237,27 +237,11 @@
   sound.enable = true;
   hardware.pulseaudio = {
     enable = true;
-    #extraModules = [ pkgs.pulseaudio-modules-bt ];
+    extraModules = [ pkgs.pulseaudio-modules-bt ];
     package = pkgs.pulseaudioFull;
     support32Bit = true;
   }; 
-
-  # Use /etc/nixos/vscode.nix
-  # See https://discourse.nixos.org/t/vscode-extensions-setup/1801/2
-  vscode.user = "pvelho";
-  vscode.homeDir = "/home/pvelho";
-  vscode.extensions = with pkgs.vscode-extensions; [
-    ms-vscode.cpptools
-    bbenoist.Nix
-    ms-python.python
-    ms-azuretools.vscode-docker
-    ms-vscode-remote.remote-ssh    
-  ];
-  nixpkgs.latestPackages = [
-    "vscode"
-    "vscode-extensions"
-  ];
-  
+ 
   networking.hostName = "fox";
   networking.networkmanager.enable = true;
 
