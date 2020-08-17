@@ -29,9 +29,12 @@ in
     ./users.nix
   ];
 
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   # Bluetooth support
   boot.kernelParams = [
     "btusb"
+    "acpi_rev_override=1"
   ];
 
   # Accept non free packages, needed for skype, zoom, unrar, etc...
@@ -312,10 +315,5 @@ in
     enable = true;
     joinNetworks = ["a13d7a0e59ae6de4"];
   };
-
-  systemd.targets.sleep.enable = false;
-  systemd.targets.suspend.enable = false;
-  systemd.targets.hibernate.enable = false;
-  systemd.targets.hybrid-sleep.enable = false;
 }
 
