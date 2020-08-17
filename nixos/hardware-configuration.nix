@@ -7,11 +7,8 @@
   imports =
     [ <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
     ];
-
+  
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" "btusb" ];
-  boot.extraModulePackages = [ ];
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/ece11e18-6358-487b-a216-25e5f9a6bdb5";
@@ -27,4 +24,5 @@
 
   nix.maxJobs = lib.mkDefault 8;
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+
 }

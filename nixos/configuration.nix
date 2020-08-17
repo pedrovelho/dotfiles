@@ -3,8 +3,6 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-
-
 let
   extensions = (with pkgs.vscode-extensions; [
       bbenoist.Nix
@@ -22,20 +20,23 @@ let
     };
 in
 {
+  # Options fo Dell XPS 15
+  # https://github.com/NixOS/nixos-hardware/tree/master/dell/xps/15-9560
+  # https://gist.github.com/fikovnik/f9d5283689d663d162d79c061774f79b
+  imports = [ # Include the results of the hardware scan.
+    <nixos-hardware/dell/xps/15-9560/intel>
+    ./hardware-configuration.nix
+    ./users.nix
+  ];
+
+  # Bluetooth support
+  boot.kernelParams = [
+    "btusb"
+  ];
 
   # Accept non free packages, needed for skype, zoom, unrar, etc...
   nixpkgs.config.allowUnfree = true;
-
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      ./users.nix
-    ];
-
-  # UEFI with anti-freeze on Dell XPS 15
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.systemd-boot.enable = true;
-
+  
   programs.zsh.enable = true;
 
   fonts = {
@@ -73,10 +74,16 @@ in
     # vscode
     vscode-with-extensions
 
+    zerotierone
+
     # Non free, need allowUnfree set to true
     zoom-us
     unrar
     skype
+
+    # Sanofi
+    citrix_workspace
+    chromium
 
     # Nix utils
     nix-prefetch-scripts
@@ -226,6 +233,10 @@ in
     # Dell XPS 15 specific
     xorg.xbacklight
   ];
+
+  environment.etc = {
+    "hosts".text = "10.161.1.235 Canonceecf2.local\n";
+  };
  
   programs.light.enable = true;
 
@@ -241,7 +252,9 @@ in
   programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
 
   # List services that you want to enable:
-
+  services.printing.enable = true;
+  services.printing.drivers = [ pkgs.gutenprint ];
+  
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
@@ -266,11 +279,6 @@ in
   networking.hostName = "fox";
   networking.networkmanager.enable = true;
 
-  services.logind.extraConfig = "
-    HandleLidSwitch=suspend
-    HandleLidSwitchDocked=suspend
-  ";
-
   # Enable the X11 windowing system.
   services.xserver = {
     enable = true;
@@ -293,5 +301,21 @@ in
   # should.
   system.stateVersion = "20.03"; # Did you read the comment?
 
+  system.autoUpgrade.enable = true;
+  system.autoUpgrade.allowReboot = true;
+
+  # users.extraGroups.vboxusers.members = [ "velho" ];
+  # virtualisation.virtualbox.host.enable = true;
+  # virtualisation.virtualbox.host.enableExtensionPack = true;
+
+  services.zerotierone = {
+    enable = true;
+    joinNetworks = ["a13d7a0e59ae6de4"];
+  };
+
+  systemd.targets.sleep.enable = false;
+  systemd.targets.suspend.enable = false;
+  systemd.targets.hibernate.enable = false;
+  systemd.targets.hybrid-sleep.enable = false;
 }
 

@@ -163,3 +163,6 @@ ryax-delete-all () {
     done
 }
 
+killp () {
+    kill -9 `pgrep $1`
+}
