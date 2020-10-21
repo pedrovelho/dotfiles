@@ -6,18 +6,40 @@
 let
   extensions = (with pkgs.vscode-extensions; [
       bbenoist.Nix
-      ms-python.python
       ms-azuretools.vscode-docker
       ms-vscode-remote.remote-ssh
-    ]) ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [{
+  ])
+
+  ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+    {
       name = "remote-ssh-edit";
       publisher = "ms-vscode-remote";
       version = "0.47.2";
       sha256 = "1hp6gjh4xp2m1xlm1jsdzxw9d8frkiidhph6nvl24d0h8z34w49g";
-  }];
+    }
+    {
+      name = "nix-env-selector";
+      publisher = "arrterian";
+      version = "0.1.2";
+      sha256 = "1n5ilw1k29km9b0yzfd32m8gvwa2xhh6156d4dys6l8sbfpp2cv9";
+    }
+    {
+      name = "python";
+      publisher = "ms-python";
+      version = "2020.9.114305";
+      sha256 = "1vh0wvfvzszc58lw7dbl60knpm5l6rrsghfchhn5dvwyadx4a33h";
+    }
+    {
+      name = "code-spell-checker";
+      publisher = "streetsidesoftware";
+      version = "1.9.2";
+      sha256 = "17wkhwlnicy9inkv69mlkfz6ws7n6j7wfsnwczkc7dbyfqcz0mdb";
+    }
+  ];
+
   vscode-with-extensions = pkgs.vscode-with-extensions.override {
-      vscodeExtensions = extensions;
-    };
+    vscodeExtensions = extensions;
+  };
 in
 {
   # Options fo Dell XPS 15
@@ -85,7 +107,7 @@ in
     skype
 
     # Sanofi
-    citrix_workspace
+    #citrix_workspace
     chromium
 
     # Nix utils
@@ -136,19 +158,26 @@ in
     gnome3.evolution
     gnome3.gnome-tweaks
     evolution-data-server
+    kazam
     
     # KDE stuff
     kdeApplications.spectacle
 
     # Web
     firefox
+    thunderbird
     chrome-gnome-shell
     nodejs-12_x
 
     # Dictionnaries
+    aspell
     aspellDicts.fr
     aspellDicts.en
     aspellDicts.pt_BR
+    hunspell
+    hunspellDicts.fr-any
+    hunspellDicts.en_US-large
+    
 
     # Message and RSS
     gnome3.polari
@@ -160,7 +189,6 @@ in
     # Utils
     gnome3.gnome-disk-utility
     xorg.xkill
-    wireshark-qt
     git-cola
     gitg
     # storage
@@ -187,7 +215,7 @@ in
     gimp
     gitAndTools.gitFull
     python3
-    python37Packages.glances
+    glances
     gcc
     ctags
     gnumake
@@ -201,7 +229,6 @@ in
 
     # Gtk
     transmission-gtk
-    qt5.full
 
     # Day to day use in Ryax
     cachix
@@ -214,6 +241,12 @@ in
     emacs
     vim
 
+    # Virtualization
+    virtualbox
+
+    # Canon drivers
+    canon-cups-ufr2
+
     # Web Site
     hugo
 
@@ -223,8 +256,12 @@ in
     qemu
 
     # Printers
+    gutenprint
+    gutenprintBin
     saneBackends
-    samsungUnifiedLinuxDriver
+
+    # DB
+    mysql-workbench
 
     # Fun
     fortune
@@ -232,15 +269,17 @@ in
     wesnoth-dev
     docker-compose
     sshfsFuse
-
+    skopeo
+    
     # Dell XPS 15 specific
     xorg.xbacklight
   ];
 
-  environment.etc = {
-    "hosts".text = "10.161.1.235 Canonceecf2.local\n";
-  };
- 
+  networking.extraHosts =
+  ''
+    10.161.1.235 Canonceecf2.local
+  '';
+
   programs.light.enable = true;
 
   # Enable docker on boot
@@ -248,7 +287,7 @@ in
     enable = true;
     enableOnBoot = true;
   };
-  
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -302,14 +341,14 @@ in
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "20.03"; # Did you read the comment?
+  system.stateVersion = "20.09"; # Did you read the comment?
 
   system.autoUpgrade.enable = true;
   system.autoUpgrade.allowReboot = true;
 
-  # users.extraGroups.vboxusers.members = [ "velho" ];
-  # virtualisation.virtualbox.host.enable = true;
-  # virtualisation.virtualbox.host.enableExtensionPack = true;
+  users.extraGroups.vboxusers.members = [ "velho" ];
+  virtualisation.virtualbox.host.enable = true;
+  virtualisation.virtualbox.host.enableExtensionPack = true;
 
   services.zerotierone = {
     enable = true;
