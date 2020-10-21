@@ -133,6 +133,7 @@ ls -1 ~/IdeaProjects/object_detection/funcs/ | while read func ; do ./cli/ryax-c
 alias config-registry="source <(pass ryax/aws-s3)"
 alias allpods="kubectl get pods --all-namespaces"
 alias delryaxpod="kubectl unapply pod -n ryaxns"
+alias win="VirtualBoxVM --startvm \"Win\""
 
 function watcha {
     watch $(alias "$@" | cut -d\' -f2)
@@ -166,3 +167,7 @@ ryax-delete-all () {
 killp () {
     kill -9 `pgrep $1`
 }
+
+autoload -Uz compinit
+zstyle ':completion:*' menu select
+fpath+=~/.zfunc
