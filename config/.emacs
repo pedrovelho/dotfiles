@@ -3,7 +3,7 @@
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
-(package-initialize)
+;;(package-initialize)
 ;; load emacs 24's package system. Add MELPA repository.
 (when (>= emacs-major-version 24)
   (require 'package)
@@ -34,7 +34,14 @@
 (custom-set-variables
  '(markdown-command "/run/current-system/sw/bin/pandoc --metadata pagetitle=\"markdown-preview\" -s -f markdown -t html -c file:///home/pvelho/.emacs.d/github-pandoc.css"))
 
+;; Tell emacs where is your personal elisp lib dir
+(add-to-list 'load-path "~/.emacs.d/lisp/")
+
+;; load the packaged named xyz.
+(load "yaml-mode") ;; best not to include the ending “.el” or “.elc”
+
 (require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-mode))
 (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
 
 
@@ -42,3 +49,5 @@
   '(lambda ()
      (define-key yaml-mode-map "\C-m" 'newline-and-indent)))
 
+;; Fuck you bell
+(setq ring-bell-function 'ignore)
