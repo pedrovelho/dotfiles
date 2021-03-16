@@ -35,6 +35,12 @@ let
       version = "1.9.2";
       sha256 = "17wkhwlnicy9inkv69mlkfz6ws7n6j7wfsnwczkc7dbyfqcz0mdb";
     }
+    {
+      name = "code-spell-checker-french";
+      publisher = "streetsidesoftware";
+      version = "0.1.10";
+      sha256 = "1rbrsb5wh4mkz1a6kp4pdgcw3c9p9j2c1rsii9rr4qk9w7x8q2b2";
+    }
   ];
 
   vscode-with-extensions = pkgs.vscode-with-extensions.override {
@@ -62,8 +68,6 @@ in
   # Accept non free packages, needed for skype, zoom, unrar, etc...
   nixpkgs.config.allowUnfree = true;
   
-  programs.zsh.enable = true;
-
   fonts = {
     enableFontDir = true;
     fonts = with pkgs; [
@@ -93,22 +97,22 @@ in
   # Set your time zone.
   time.timeZone = "Europe/Paris";
 
+  #browserpass
+  programs.browserpass.enable = true;
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     # vscode
     vscode-with-extensions
 
-    zerotierone
+    #zerotierone
 
     # Non free, need allowUnfree set to true
     zoom-us
     unrar
     skype
-
-    # Sanofi
-    #citrix_workspace
-    chromium
+    teams
 
     # Nix utils
     nix-prefetch-scripts
@@ -130,7 +134,9 @@ in
     tree
     ncdu
     unzip
-
+    zip
+    p7zip
+    
     # Java
     maven
     jdk
@@ -147,16 +153,19 @@ in
     ranger
     # ranger previews
     libcaca   # video
+    jellyfin  # homemade netflix
     highlight # code
     atool     # archives
     w3m       # web
     poppler   # PDF
     mediainfo # audio and video
-
+    lingot    # guitar tuner
+    
     # Gnome stuff
     gnomeExtensions.system-monitor
     gnome3.evolution
     gnome3.gnome-tweaks
+    gnome3.vinagre
     evolution-data-server
     kazam
     
@@ -167,8 +176,10 @@ in
     firefox
     thunderbird
     chrome-gnome-shell
+    google-chrome
     nodejs-12_x
-
+    filezilla
+    
     # Dictionnaries
     aspell
     aspellDicts.fr
@@ -227,6 +238,16 @@ in
     pandoc
     socat
 
+    # Cloud stuff
+    awscli2
+    citrix_workspace
+    google-cloud-sdk
+    rclone
+
+    # PDF
+    xournal
+    xournalpp
+
     # Gtk
     transmission-gtk
 
@@ -242,7 +263,7 @@ in
     vim
 
     # Virtualization
-    virtualbox
+    #virtualbox
 
     # Canon drivers
     canon-cups-ufr2
@@ -254,6 +275,12 @@ in
     cloc
     jq
     qemu
+    aegisub
+    bind
+    eksctl 
+    openvpn
+    patchelf
+    pdftk
 
     # Printers
     gutenprint
@@ -261,8 +288,9 @@ in
     saneBackends
 
     # DB
-    mysql-workbench
-
+    dbeaver
+    mariadb-client
+    
     # Fun
     fortune
     sl
@@ -281,6 +309,8 @@ in
   '';
 
   programs.light.enable = true;
+
+  programs.zsh.enable = true;
 
   # Enable docker on boot
   virtualisation.docker = {
@@ -301,10 +331,10 @@ in
   services.openssh.enable = true;
 
   # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  networking.firewall.allowedTCPPorts = [ 8080 8096 22 32100 32001 ];
+  networking.firewall.allowedUDPPorts = [ 8080 8096 22 32100 32001 ];
   # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+  #networking.firewall.enable = false;
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
@@ -347,12 +377,13 @@ in
   system.autoUpgrade.allowReboot = true;
 
   users.extraGroups.vboxusers.members = [ "velho" ];
-  virtualisation.virtualbox.host.enable = true;
-  virtualisation.virtualbox.host.enableExtensionPack = true;
+  # Enable two lines below plus the virtualbox package to get vbox
+  #virtualisation.virtualbox.host.enable = true;
+  #virtualisation.virtualbox.host.enableExtensionPack = true;
 
-  services.zerotierone = {
-    enable = true;
-    joinNetworks = ["a13d7a0e59ae6de4"];
-  };
+  #services.zerotierone = {
+  #  enable = true;
+  #  joinNetworks = ["a13d7a0e59ae6de4"];
+  #};
 }
 
