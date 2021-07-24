@@ -174,3 +174,5 @@ fpath+=~/.zfunc
 
 export NIX_PATH=ryaxpkgs=/home/velho/ryax/ryax-main/ryaxpkgs:ryaxuserpkgs=/home/velho/ryax/ryax-main/ryaxuserpkgs:$NIX_PATH
 alias ryax-env='nix-shell -E "with import <ryaxuserpkgs> {}; ryaxShell ./."'
+
+export KUBE_EDITOR=emacs

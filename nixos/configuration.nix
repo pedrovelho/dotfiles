@@ -9,7 +9,7 @@ let
       ms-azuretools.vscode-docker
       ms-vscode-remote.remote-ssh
   ])
-
+   
   ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
     {
       name = "remote-ssh-edit";
@@ -57,6 +57,8 @@ in
     ./users.nix
   ];
 
+  services.tlp.enable = false;
+
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Bluetooth support
@@ -69,7 +71,7 @@ in
   nixpkgs.config.allowUnfree = true;
   
   fonts = {
-    enableFontDir = true;
+    fontDir.enable = true;
     fonts = with pkgs; [
       nerdfonts
     ];
@@ -163,15 +165,9 @@ in
     
     # Gnome stuff
     gnomeExtensions.system-monitor
-    gnome3.evolution
-    gnome3.gnome-tweaks
-    gnome3.vinagre
-    evolution-data-server
+    gnome.gnome-tweaks
     kazam
     
-    # KDE stuff
-    kdeApplications.spectacle
-
     # Web
     firefox
     thunderbird
@@ -215,7 +211,8 @@ in
     gnupg
     rofi-pass
     mkpasswd
-
+    pinentry
+    
     # Graphic tools
     gnome3.meld
     gcolor3
@@ -306,6 +303,7 @@ in
   networking.extraHosts =
   ''
     10.161.1.235 Canonceecf2.local
+    40.69.34.58 keycloak-uaa-01
   '';
 
   programs.light.enable = true;
@@ -321,8 +319,13 @@ in
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
-  programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
 
+  programs.ssh.forwardX11 = true;
+  
   # List services that you want to enable:
   services.printing.enable = true;
   services.printing.drivers = [ pkgs.gutenprint ];
@@ -331,10 +334,10 @@ in
   services.openssh.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 8080 8096 22 32100 32001 ];
-  networking.firewall.allowedUDPPorts = [ 8080 8096 22 32100 32001 ];
+  #networking.firewall.allowedTCPPorts = [ 8080 8096 22 32100 32001 ];
+  #networking.firewall.allowedUDPPorts = [ 8080 8096 22 32100 32001 ];
   # Or disable the firewall altogether.
-  #networking.firewall.enable = false;
+  networking.firewall.enable = false;
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
@@ -363,7 +366,7 @@ in
 
     # Enable graphical login and desktop
     displayManager.gdm.enable = true;
-    desktopManager.gnome3.enable = true;
+    desktopManager.gnome.enable = true;
     displayManager.defaultSession = "gnome";
   };
   
@@ -371,7 +374,7 @@ in
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "20.09"; # Did you read the comment?
+  system.stateVersion = "21.05"; # Did you read the comment?
 
   system.autoUpgrade.enable = true;
   system.autoUpgrade.allowReboot = true;
@@ -385,5 +388,17 @@ in
   #  enable = true;
   #  joinNetworks = ["a13d7a0e59ae6de4"];
   #};
+
+  services.avahi = {
+    enable = true;
+  };
+
+  services.dhcpd4 = {
+    enable = false;
+  };
+
+  programs.steam.enable = true;
+  nixpkgs.config.allowNonFree = true;
+
 }
 
