@@ -176,3 +176,15 @@ export NIX_PATH=ryaxpkgs=/home/velho/ryax/ryax-main/ryaxpkgs:ryaxuserpkgs=/home/
 alias ryax-env='nix-shell -E "with import <ryaxuserpkgs> {}; ryaxShell ./."'
 
 export KUBE_EDITOR=emacs
+
+nix-clean () {
+  nix-env --delete-generations old
+  nix-store --gc
+  nix-channel --update
+  nix-env -u --always
+  for link in /nix/var/nix/gcroots/auto/*
+  do
+    rm $(readlink "$link")
+  done
+  nix-collect-garbage -d
+}
