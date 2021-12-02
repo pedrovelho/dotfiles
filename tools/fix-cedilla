@@ -14,7 +14,7 @@
 
 LANG=${LANG:=en_US.UTF-8}
 # Depend on nixos try find / -name 'compose-dir'
-COMPOSE_DIR="/nix/store/s28pqzg98p4l95x7az7w1r7mpvj0iihq-libX11-1.6.8/share/X11/locale/"
+COMPOSE_DIR="/nix/store/hn1g7n15w4f18kzaf31sj59qvc6visxr-libX11-1.7.2/share/X11/locale/"
 USER_COMPOSE="$HOME/.XCompose"
 ENVFILE="/etc/environment"
 INPUT_METHOD="cedilla"
