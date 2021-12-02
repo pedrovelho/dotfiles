@@ -1,3 +1,6 @@
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
 
 ;; Added by Package.el.  This must come before configurations of
 ;; installed packages.  Don't delete this line.  If you don't want it,
@@ -17,7 +20,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(inhibit-startup-screen t)
- '(package-selected-packages (quote (markdown-mode nix-mode json-mode)))
+ '(markdown-command
+   "/run/current-system/sw/bin/pandoc --metadata pagetitle=\"markdown-preview\" -s -f markdown -t html -c file:///home/pvelho/.emacs.d/github-pandoc.css")
+ '(package-selected-packages
+   '(nix-modeline nix-buffer magit-section nix-haskell-mode markdown-mode nix-mode json-mode))
  '(vc-follow-symlinks t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -31,8 +37,7 @@
              '("melpa" . "https://melpa.org/packages/") t)
 
 
-(custom-set-variables
- '(markdown-command "/run/current-system/sw/bin/pandoc --metadata pagetitle=\"markdown-preview\" -s -f markdown -t html -c file:///home/pvelho/.emacs.d/github-pandoc.css"))
+
 
 ;; Tell emacs where is your personal elisp lib dir
 (add-to-list 'load-path "~/.emacs.d/lisp/")
@@ -51,3 +56,11 @@
 
 ;; Fuck you bell
 (setq ring-bell-function 'ignore)
+
+
+(add-to-list 'load-path "~/.emacs.d/site-lisp/nix-mode/")
+
+(with-eval-after-load 'info
+  (info-initialize)
+  (add-to-list 'Info-directory-list
+               "~/.emacs.d/site-lisp/nix-mode/"))
