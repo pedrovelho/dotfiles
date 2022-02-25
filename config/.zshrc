@@ -4,17 +4,20 @@ export PATH=$HOME/bin:/usr/local/bin:$PATH
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
+ZSH_TMUX_AUTOSTART=true
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 ZSH_THEME="agnoster"
+#ZSH_THEME=random
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
 # If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -70,8 +73,9 @@ ZSH_THEME="agnoster"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 plugins+=(kubectl)
+plugins+=(tmux)
 
-source $ZSH/oh-my-zsh.sh
+#source $ZSH/oh-my-zsh.sh
 
 # Added autocompletion to kubectl commands
 if [  ]; then source <(kubectl completion zsh); fi
@@ -106,10 +110,14 @@ alias tmux-kill="tmux kill-session -t"
 alias tmux-atta="tmux attach-session -t"
 
 exit() {
-    if [[ -z $TMUX ]]; then
+    if [[ -z "${TMUX}" ]] then
         builtin exit
     else
-        tmux detach
+	if [[ -v POETRY_ACTIVE ]]; then
+	    builtin exit
+	else
+	    tmux detach
+        fi
     fi
 }
 
@@ -171,9 +179,6 @@ killp () {
 autoload -Uz compinit
 zstyle ':completion:*' menu select
 fpath+=~/.zfunc
-
-export NIX_PATH=ryaxpkgs=/home/velho/ryax/ryax-main/ryaxpkgs:ryaxuserpkgs=/home/velho/ryax/ryax-main/ryaxuserpkgs:$NIX_PATH
-alias ryax-env='nix-shell -E "with import <ryaxuserpkgs> {}; ryaxShell ./."'
 
 export KUBE_EDITOR=emacs
 

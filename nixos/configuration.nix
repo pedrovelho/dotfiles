@@ -1,72 +1,58 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, pkgs, ... }:
+{ config, lib, pkgs, modulesPath, ... }:
 let
-  extensions = (with pkgs.vscode-extensions; [
-      bbenoist.Nix
-      ms-azuretools.vscode-docker
-      ms-vscode-remote.remote-ssh
-  ])
-   
-  ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-    {
-      name = "remote-ssh-edit";
-      publisher = "ms-vscode-remote";
-      version = "0.47.2";
-      sha256 = "1hp6gjh4xp2m1xlm1jsdzxw9d8frkiidhph6nvl24d0h8z34w49g";
-    }
-    {
-      name = "nix-env-selector";
-      publisher = "arrterian";
-      version = "0.1.2";
-      sha256 = "1n5ilw1k29km9b0yzfd32m8gvwa2xhh6156d4dys6l8sbfpp2cv9";
-    }
-    {
-      name = "python";
-      publisher = "ms-python";
-      version = "2020.9.114305";
-      sha256 = "1vh0wvfvzszc58lw7dbl60knpm5l6rrsghfchhn5dvwyadx4a33h";
-    }
-    {
-      name = "code-spell-checker";
-      publisher = "streetsidesoftware";
-      version = "1.9.2";
-      sha256 = "17wkhwlnicy9inkv69mlkfz6ws7n6j7wfsnwczkc7dbyfqcz0mdb";
-    }
-    {
-      name = "code-spell-checker-french";
-      publisher = "streetsidesoftware";
-      version = "0.1.10";
-      sha256 = "1rbrsb5wh4mkz1a6kp4pdgcw3c9p9j2c1rsii9rr4qk9w7x8q2b2";
-    }
-  ];
-
-  vscode-with-extensions = pkgs.vscode-with-extensions.override {
-    vscodeExtensions = extensions;
-  };
+  nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
+    export __NV_PRIME_RENDER_OFFLOAD=1
+    export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export __VK_LAYER_NV_optimus=NVIDIA_only
+    exec -a "$0" "$@"
+  '';
 in
 {
-  # Options fo Dell XPS 15
-  # https://github.com/NixOS/nixos-hardware/tree/master/dell/xps/15-9560
-  # https://gist.github.com/fikovnik/f9d5283689d663d162d79c061774f79b
+  # Options for Lenovo ThinkPad X1 Gen 3
   imports = [ # Include the results of the hardware scan.
-    <nixos-hardware/dell/xps/15-9560/intel>
     ./hardware-configuration.nix
     ./users.nix
+    ./kill-all-docker-containers.nix
   ];
+
+  services.xserver.enable = true;
+  services.xserver.layout = "us";
+  services.xserver.xkbVariant = "intl";
+  services.xserver.xkbOptions = "eurosign:e";
+
+  # Enable graphical login and desktop
+  services.xserver.displayManager.gdm.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.displayManager.defaultSession = "gnome";
+  
+  boot = {
+    initrd.availableKernelModules = [ "battery" ];
+    kernelModules = [ "acpi_call" ];
+    extraModulePackages = with config.boot.kernelPackages; [ acpi_call ];
+  };
+
+  hardware.opengl.extraPackages = with pkgs; [
+    vaapiIntel
+    vaapiVdpau
+    libvdpau-va-gl
+    intel-media-driver
+  ];
+
+  boot.kernel.sysctl = {
+    "vm.swappiness" = lib.mkDefault 1;
+  };
+
+  services.fstrim.enable = lib.mkDefault true;
+  
+  services.throttled.enable = lib.mkDefault true;
+  hardware.trackpoint.device = "TPPS/2 Elan TrackPoint";
 
   services.tlp.enable = false;
-
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-
-  # Bluetooth support
-  boot.kernelParams = [
-    "btusb"
-    "acpi_rev_override=1"
-  ];
-
+  
   # Accept non free packages, needed for skype, zoom, unrar, etc...
   nixpkgs.config.allowUnfree = true;
   
@@ -77,18 +63,10 @@ in
     ];
   };
 
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
+  # Disable explicitely use networkManager instead
   networking.useDHCP = false;
-  networking.interfaces.wlp2s0.useDHCP = true;
-
   hardware.bluetooth.enable = true;
   
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
   # Select internationalisation properties.
   console = {
      font = "Fura Code Regular Nerd Font Complete Mon";
@@ -105,16 +83,16 @@ in
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    # vscode
-    vscode-with-extensions
+    # Custom scripts
+    nvidia-offload
 
-    #zerotierone
+    #pycharm
+    jetbrains.pycharm-community
 
     # Non free, need allowUnfree set to true
     zoom-us
     unrar
     skype
-    teams
 
     # Nix utils
     nix-prefetch-scripts
@@ -143,6 +121,9 @@ in
     maven
     jdk
 
+    # Password store
+    pass
+
     # Command line extra
     bc
     ffmpeg
@@ -164,10 +145,12 @@ in
     lingot    # guitar tuner
     
     # Gnome stuff
-    gnomeExtensions.system-monitor
     gnome.gnome-tweaks
+    gtop
+    libgtop
+    rake
     kazam
-    
+
     # Web
     firefox
     thunderbird
@@ -185,7 +168,6 @@ in
     hunspellDicts.fr-any
     hunspellDicts.en_US-large
     
-
     # Message and RSS
     gnome3.polari
     liferea
@@ -198,6 +180,7 @@ in
     xorg.xkill
     git-cola
     gitg
+
     # storage
     ntfs3g
     exfat
@@ -237,8 +220,7 @@ in
 
     # Cloud stuff
     awscli2
-    citrix_workspace
-    google-cloud-sdk
+    google-cloud-sdk-gce
     rclone
 
     # PDF
@@ -272,7 +254,6 @@ in
     cloc
     jq
     qemu
-    aegisub
     bind
     eksctl 
     openvpn
@@ -298,12 +279,25 @@ in
     
     # Dell XPS 15 specific
     xorg.xbacklight
+
+    # install ifuse
+    ideviceinstaller
+    ifuse
+    libimobiledevice
+
+    # poetry, python package manager
+    poetry
+
+    # varzia
+    retroarchFull
   ];
 
   networking.extraHosts =
   ''
     10.161.1.235 Canonceecf2.local
+    192.168.68.119 HP947F89.local
     40.69.34.58 keycloak-uaa-01
+    192.168.68.107 BRW485F9938749C.local
   '';
 
   programs.light.enable = true;
@@ -325,7 +319,10 @@ in
   };
 
   programs.ssh.forwardX11 = true;
-  
+
+  # Enable singularity
+  programs.singularity.enable = true;
+
   # List services that you want to enable:
   services.printing.enable = true;
   services.printing.drivers = [ pkgs.gutenprint ];
@@ -333,14 +330,8 @@ in
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
-  # Open ports in the firewall.
-  #networking.firewall.allowedTCPPorts = [ 8080 8096 22 32100 32001 ];
-  #networking.firewall.allowedUDPPorts = [ 8080 8096 22 32100 32001 ];
   # Or disable the firewall altogether.
   networking.firewall.enable = false;
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
 
   # Enable sound.
   sound.enable = true;
@@ -350,55 +341,48 @@ in
     package = pkgs.pulseaudioFull;
     support32Bit = true;
   }; 
- 
-  networking.hostName = "fox";
-  networking.networkmanager.enable = true;
 
-  # Enable the X11 windowing system.
-  services.xserver = {
-    enable = true;
-    layout = "us";
-    xkbVariant = "intl";
-    xkbOptions = "eurosign:e";
+  # Use the systemd-boot EFI boot loader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
-    # Enable touchpad support.
-    libinput.enable = true;
-
-    # Enable graphical login and desktop
-    displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
-    displayManager.defaultSession = "gnome";
-  };
-  
+  networking.hostName = "lenovo-nixos";
+   
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "21.05"; # Did you read the comment?
+  system.stateVersion = "21.11"; # Did you read the comment?
 
-  system.autoUpgrade.enable = true;
-  system.autoUpgrade.allowReboot = true;
+  system.autoUpgrade.enable = false;
+  system.autoUpgrade.allowReboot = false;
 
   users.extraGroups.vboxusers.members = [ "velho" ];
-  # Enable two lines below plus the virtualbox package to get vbox
-  #virtualisation.virtualbox.host.enable = true;
-  #virtualisation.virtualbox.host.enableExtensionPack = true;
-
-  #services.zerotierone = {
-  #  enable = true;
-  #  joinNetworks = ["a13d7a0e59ae6de4"];
-  #};
 
   services.avahi = {
     enable = true;
   };
 
-  services.dhcpd4 = {
-    enable = false;
-  };
-
   programs.steam.enable = true;
-  nixpkgs.config.allowNonFree = true;
 
+  # Enable firmware updates
+  services.fwupd.enable = true;
+
+  # NVIDIA
+  services.xserver.videoDrivers = [ "modeset" "nvidia" ];
+  # hardware.nvidia.prime = {
+  #   offload.enable = true;
+  #   # Bus ID of the Intel GPU. You can find it using lspci, VGA Controller
+  #   intelBusId = "PCI:0:2:0";
+  #   # Bus ID of the NVIDIA GPU. You can find it using lspci 
+  #   nvidiaBusId = "PCI:1:0:0";
+  # };
+  # specialisation = {
+  #   external-display.configuration = {
+  #     system.nixos.tags = [ "external-display" ];
+  #     hardware.nvidia.prime.offload.enable = lib.mkForce false;
+  #     hardware.nvidia.powerManagement.enable = lib.mkForce false;
+  #   };
+  # };
 }
 
