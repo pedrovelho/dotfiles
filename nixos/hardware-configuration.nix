@@ -7,7 +7,7 @@
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "sd_mod" "xhci_hcd" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "sd_mod" "xhci_hcd" "xhci_pci" "usb_storage" "rtsx_pci_sdmmc" ];
   boot.initrd.kernelModules = [ "kvm-intel" ];
   boot.kernelModules = [ ];
   boot.extraModulePackages = [ ];
@@ -27,4 +27,5 @@
     ];
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }

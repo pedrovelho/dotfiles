@@ -2,15 +2,6 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 { config, lib, pkgs, modulesPath, ... }:
-let
-  nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
-    export __NV_PRIME_RENDER_OFFLOAD=1
-    export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
-    export __GLX_VENDOR_LIBRARY_NAME=nvidia
-    export __VK_LAYER_NV_optimus=NVIDIA_only
-    exec -a "$0" "$@"
-  '';
-in
 {
   # Options for Lenovo ThinkPad X1 Gen 3
   imports = [ # Include the results of the hardware scan.
@@ -19,43 +10,40 @@ in
     ./kill-all-docker-containers.nix
   ];
 
-  services.xserver.enable = true;
-  services.xserver.layout = "us";
-  services.xserver.xkbVariant = "intl";
-  services.xserver.xkbOptions = "eurosign:e";
-
   # Enable graphical login and desktop
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-  services.xserver.displayManager.defaultSession = "gnome";
-  
+  services = {
+    xserver = {
+      enable = true;
+      layout = "us";
+      xkbVariant = "intl";
+      xkbOptions = "eurosign:e";
+      enableCtrlAltBackspace = true;
+      desktopManager.gnome.enable = true;
+      displayManager.gdm.enable = true;
+      displayManager.gdm.wayland = true;
+    };
+  };
+
   boot = {
     initrd.availableKernelModules = [ "battery" ];
     kernelModules = [ "acpi_call" ];
     extraModulePackages = with config.boot.kernelPackages; [ acpi_call ];
   };
 
-  hardware.opengl.extraPackages = with pkgs; [
-    vaapiIntel
-    vaapiVdpau
-    libvdpau-va-gl
-    intel-media-driver
-  ];
-
   boot.kernel.sysctl = {
     "vm.swappiness" = lib.mkDefault 1;
   };
 
   services.fstrim.enable = lib.mkDefault true;
-  
+
   services.throttled.enable = lib.mkDefault true;
   hardware.trackpoint.device = "TPPS/2 Elan TrackPoint";
 
   services.tlp.enable = false;
-  
+
   # Accept non free packages, needed for skype, zoom, unrar, etc...
   nixpkgs.config.allowUnfree = true;
-  
+
   fonts = {
     fontDir.enable = true;
     fonts = with pkgs; [
@@ -66,28 +54,32 @@ in
   # Disable explicitely use networkManager instead
   networking.useDHCP = false;
   hardware.bluetooth.enable = true;
-  
+
   # Select internationalisation properties.
   console = {
      font = "Fura Code Regular Nerd Font Complete Mon";
-     keyMap = "us";
+     keyMap = "us-acentos";
   };
-  i18n.defaultLocale = "en_US.UTF-8";
+  i18n = {
+     defaultLocale = "en_US.UTF-8";
+     inputMethod.ibus.engines = with pkgs.ibus-engines; [ typing-booster ];
+  };
 
   # Set your time zone.
   time.timeZone = "Europe/Paris";
 
-  #browserpass
+  # browserpass
   programs.browserpass.enable = true;
+  nixpkgs.config.firefox.enableBrowserpass = true;
+  nixpkgs.config.firefox.enableGnomeExtensions = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    # Custom scripts
-    nvidia-offload
-
-    #pycharm
+    # Dev
     jetbrains.pycharm-community
+    glib.dev
+    linuxHeaders
 
     # Non free, need allowUnfree set to true
     zoom-us
@@ -103,6 +95,7 @@ in
     pmutils
     nmap
     htop
+    gtop
     usbutils
     iotop
     stress
@@ -110,13 +103,15 @@ in
     lsof
 
     # Files
+    meld
     file
     tree
     ncdu
     unzip
     zip
     p7zip
-    
+    unrar
+
     # Java
     maven
     jdk
@@ -143,22 +138,27 @@ in
     poppler   # PDF
     mediainfo # audio and video
     lingot    # guitar tuner
-    
+    helm
+
     # Gnome stuff
+    gnome.gnome-disk-utility
+    gnome.gnome-shell
+    gnome.gnome-shell-extensions
     gnome.gnome-tweaks
-    gtop
+    gnomeExtensions.gsconnect
+    gettext
     libgtop
+    gir-rs
     rake
     kazam
 
     # Web
+    google-chrome
+    chrome-gnome-shell
     firefox
     thunderbird
-    chrome-gnome-shell
-    google-chrome
-    nodejs-12_x
     filezilla
-    
+
     # Dictionnaries
     aspell
     aspellDicts.fr
@@ -167,7 +167,7 @@ in
     hunspell
     hunspellDicts.fr-any
     hunspellDicts.en_US-large
-    
+
     # Message and RSS
     gnome3.polari
     liferea
@@ -175,9 +175,10 @@ in
     # Media
     vlc
 
+    # Security
+    sssd
+
     # Utils
-    gnome3.gnome-disk-utility
-    xorg.xkill
     git-cola
     gitg
 
@@ -195,9 +196,9 @@ in
     rofi-pass
     mkpasswd
     pinentry
-    
+
     # Graphic tools
-    gnome3.meld
+    xorg.xkill
     gcolor3
     graphviz
     imagemagick
@@ -222,6 +223,20 @@ in
     awscli2
     google-cloud-sdk-gce
     rclone
+    azure-cli
+
+    # Bluetooth
+    bluez
+
+    # PS5
+    chiaki
+
+    # Others
+    glxinfo
+    gparted
+    kubernetes-helm
+    helmfile
+    skopeo
 
     # PDF
     xournal
@@ -238,7 +253,8 @@ in
     pssh
 
     # Editors
-    emacs
+    emacs27
+    emacs27Packages.nix-mode
     vim
 
     # Virtualization
@@ -255,7 +271,7 @@ in
     jq
     qemu
     bind
-    eksctl 
+    eksctl
     openvpn
     patchelf
     pdftk
@@ -268,7 +284,7 @@ in
     # DB
     dbeaver
     mariadb-client
-    
+
     # Fun
     fortune
     sl
@@ -276,7 +292,7 @@ in
     docker-compose
     sshfsFuse
     skopeo
-    
+
     # Dell XPS 15 specific
     xorg.xbacklight
 
@@ -292,6 +308,9 @@ in
     retroarchFull
   ];
 
+  # Also install dev versions
+  environment.extraOutputsToInstall = [ "dev" ];
+
   networking.extraHosts =
   ''
     10.161.1.235 Canonceecf2.local
@@ -299,6 +318,7 @@ in
     40.69.34.58 keycloak-uaa-01
     192.168.68.107 BRW485F9938749C.local
   '';
+
 
   programs.light.enable = true;
 
@@ -308,7 +328,14 @@ in
   virtualisation.docker = {
     enable = true;
     enableOnBoot = true;
+    extraOptions = "--insecure-registry ryax-registry.ryaxns:5000";
+    enableNvidia = true;
   };
+
+  # Avoid journald to store GigaBytes of logs
+  services.journald.extraConfig = ''
+    SystemMaxUse=1G
+  '';
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -326,7 +353,7 @@ in
   # List services that you want to enable:
   services.printing.enable = true;
   services.printing.drivers = [ pkgs.gutenprint ];
-  
+
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
@@ -340,14 +367,14 @@ in
     extraModules = [ pkgs.pulseaudio-modules-bt ];
     package = pkgs.pulseaudioFull;
     support32Bit = true;
-  }; 
+  };
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "lenovo-nixos";
-   
+
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
@@ -369,20 +396,27 @@ in
   services.fwupd.enable = true;
 
   # NVIDIA
-  services.xserver.videoDrivers = [ "modeset" "nvidia" ];
-  # hardware.nvidia.prime = {
-  #   offload.enable = true;
-  #   # Bus ID of the Intel GPU. You can find it using lspci, VGA Controller
-  #   intelBusId = "PCI:0:2:0";
-  #   # Bus ID of the NVIDIA GPU. You can find it using lspci 
-  #   nvidiaBusId = "PCI:1:0:0";
-  # };
-  # specialisation = {
-  #   external-display.configuration = {
-  #     system.nixos.tags = [ "external-display" ];
-  #     hardware.nvidia.prime.offload.enable = lib.mkForce false;
-  #     hardware.nvidia.powerManagement.enable = lib.mkForce false;
-  #   };
-  # };
-}
+  services.xserver.videoDrivers = [ "nvidia" ];
+  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.beta;
+  hardware.nvidia.modesetting.enable = true;
+  hardware.nvidia.powerManagement.enable = true;
+  hardware.opengl.driSupport32Bit = true;
 
+  # Add virtualbox and docker
+  virtualisation = {
+    # virtualbox.host.enable = true;
+    libvirtd.enable = true;
+    podman.enable = true;
+  };
+
+  # boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux_5_10.override {
+  #   argsOverride = rec {
+  #     version = "5.10.94";
+  #     src = pkgs.fetchurl {
+  #           url = "mirror://kernel/linux/kernel/v5.x/linux-${version}.tar.xz";
+  #           sha256 = "sha256-KP9Eqkqaih6lKudORI2mF0yk/wQt3CAuNrFXyVHNdQg=";
+  #     };
+  #     modDirVersion = version;
+  #     };
+  # });
+}
