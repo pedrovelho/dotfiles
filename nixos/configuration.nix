@@ -17,7 +17,8 @@
       layout = "us";
       xkbVariant = "intl";
       xkbOptions = "eurosign:e";
-      enableCtrlAltBackspace = true;
+      videoDrivers = [ "modeset" "nvidia" ];
+      enableCtrlAltBackspace = false;
       desktopManager.gnome.enable = true;
       displayManager.gdm.enable = true;
       displayManager.gdm.wayland = true;
@@ -44,26 +45,25 @@
   # Accept non free packages, needed for skype, zoom, unrar, etc...
   nixpkgs.config.allowUnfree = true;
 
-  fonts = {
-    fontDir.enable = true;
-    fonts = with pkgs; [
-      nerdfonts
-    ];
-  };
+  # fonts = {
+  #   fontDir.enable = true;
+  #   fonts = with pkgs; [
+  #     nerdfonts
+  #   ];
+  # };
 
   # Disable explicitely use networkManager instead
   networking.useDHCP = false;
   hardware.bluetooth.enable = true;
 
   # Select internationalisation properties.
-  console = {
-     font = "Fura Code Regular Nerd Font Complete Mon";
-     keyMap = "us-acentos";
-  };
-  i18n = {
-     defaultLocale = "en_US.UTF-8";
-     inputMethod.ibus.engines = with pkgs.ibus-engines; [ typing-booster ];
-  };
+  # console = {
+  #    font = "Fura Code Regular Nerd Font Complete Mon";
+  #    keyMap = "us";
+  # };
+  # i18n = {
+  #    defaultLocale = "en_US.UTF-8";
+  # };
 
   # Set your time zone.
   time.timeZone = "Europe/Paris";
@@ -80,9 +80,14 @@
     jetbrains.pycharm-community
     glib.dev
     linuxHeaders
+    nodejs
+    nodePackages.prettier
+    nodePackages.eslint
+    telepresence2
 
     # Non free, need allowUnfree set to true
     zoom-us
+    teams
     unrar
     skype
 
@@ -138,13 +143,13 @@
     poppler   # PDF
     mediainfo # audio and video
     lingot    # guitar tuner
-    helm
 
     # Gnome stuff
     gnome.gnome-disk-utility
     gnome.gnome-shell
     gnome.gnome-shell-extensions
     gnome.gnome-tweaks
+    audio-recorder
     gnomeExtensions.gsconnect
     gettext
     libgtop
@@ -228,19 +233,22 @@
     # Bluetooth
     bluez
 
-    # PS5
+    # Games
     chiaki
+    retroarchFull
+    playonlinux
 
     # Others
     glxinfo
     gparted
-    kubernetes-helm
-    helmfile
     skopeo
 
     # PDF
     xournal
     xournalpp
+
+    # Security
+    openssl
 
     # Gtk
     transmission-gtk
@@ -248,6 +256,9 @@
     # Day to day use in Ryax
     cachix
     kubernetes-helm
+    popeye
+    kubectx
+    helmfile
     kubectl
     k9s
     pssh
@@ -290,12 +301,60 @@
     sl
     wesnoth-dev
     docker-compose
+    docker-machine
     sshfsFuse
     skopeo
 
-    # Dell XPS 15 specific
-    xorg.xbacklight
-
+    # command line nouveau
+    lsd
+    ag
+    ack
+    mosh
+    bat
+    delta
+    fd
+    drill
+    dog
+    duf
+    du-dust
+    btop
+    glances
+    zenith
+    tldr
+    sd
+    difftastic
+    mtr
+    plocate
+    fasd
+    autojump
+    zoxide
+    broot
+    direnv
+    fzf
+    peco
+    croc
+    hyperfine
+    httpie
+    curlie
+    xh
+    entr
+    asdf
+    tig
+    lazygit
+    lazydocker
+    choose
+    ctop
+    jc
+    yq
+    fx
+    jless
+    xsv
+    visidata
+    pdfgrep
+    gron
+    ripgrep-all
+    thefuck
+    
     # install ifuse
     ideviceinstaller
     ifuse
@@ -304,8 +363,6 @@
     # poetry, python package manager
     poetry
 
-    # varzia
-    retroarchFull
   ];
 
   # Also install dev versions
@@ -336,6 +393,9 @@
   services.journald.extraConfig = ''
     SystemMaxUse=1G
   '';
+
+  # Needed by ideviceX
+  services.usbmuxd.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -396,7 +456,6 @@
   services.fwupd.enable = true;
 
   # NVIDIA
-  services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.beta;
   hardware.nvidia.modesetting.enable = true;
   hardware.nvidia.powerManagement.enable = true;
@@ -404,19 +463,10 @@
 
   # Add virtualbox and docker
   virtualisation = {
-    # virtualbox.host.enable = true;
+    virtualbox.host.enable = true;
     libvirtd.enable = true;
     podman.enable = true;
   };
 
-  # boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux_5_10.override {
-  #   argsOverride = rec {
-  #     version = "5.10.94";
-  #     src = pkgs.fetchurl {
-  #           url = "mirror://kernel/linux/kernel/v5.x/linux-${version}.tar.xz";
-  #           sha256 = "sha256-KP9Eqkqaih6lKudORI2mF0yk/wQt3CAuNrFXyVHNdQg=";
-  #     };
-  #     modDirVersion = version;
-  #     };
-  # });
+  services.fprintd.enable = true;
 }
