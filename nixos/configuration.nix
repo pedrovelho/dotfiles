@@ -17,8 +17,12 @@
       layout = "us";
       xkbVariant = "intl";
       xkbOptions = "eurosign:e";
-      videoDrivers = [ "modeset" "nvidia" ];
-      enableCtrlAltBackspace = false;
+      # NVIDIA Optimusprime
+      videoDrivers = [ "nvidia" ];
+      # NVIDIA Bumblebee
+      #videoDrivers = [ "nvidia" ];
+      #deviceSection = ''BusID "PCI:0:2:0"'';
+      enableCtrlAltBackspace = true;
       desktopManager.gnome.enable = true;
       displayManager.gdm.enable = true;
       displayManager.gdm.wayland = true;
@@ -29,6 +33,9 @@
     initrd.availableKernelModules = [ "battery" ];
     kernelModules = [ "acpi_call" ];
     extraModulePackages = with config.boot.kernelPackages; [ acpi_call ];
+    # extraModprobeConfig = ''
+    #   options snd-intel-dspcfg dsp_driver=1
+    # '';
   };
 
   boot.kernel.sysctl = {
@@ -45,26 +52,9 @@
   # Accept non free packages, needed for skype, zoom, unrar, etc...
   nixpkgs.config.allowUnfree = true;
 
-  # fonts = {
-  #   fontDir.enable = true;
-  #   fonts = with pkgs; [
-  #     nerdfonts
-  #   ];
-  # };
-
   # Disable explicitely use networkManager instead
   networking.useDHCP = false;
-  hardware.bluetooth.enable = true;
-
-  # Select internationalisation properties.
-  # console = {
-  #    font = "Fura Code Regular Nerd Font Complete Mon";
-  #    keyMap = "us";
-  # };
-  # i18n = {
-  #    defaultLocale = "en_US.UTF-8";
-  # };
-
+ 
   # Set your time zone.
   time.timeZone = "Europe/Paris";
 
@@ -87,9 +77,8 @@
 
     # Non free, need allowUnfree set to true
     zoom-us
-    teams
     unrar
-    skype
+    skypeforlinux
 
     # Nix utils
     nix-prefetch-scripts
@@ -106,6 +95,7 @@
     stress
     tcpdump
     lsof
+    pciutils
 
     # Files
     meld
@@ -141,8 +131,10 @@
     atool     # archives
     w3m       # web
     poppler   # PDF
+    poppler_utils
     mediainfo # audio and video
     lingot    # guitar tuner
+    pciutils
 
     # Gnome stuff
     gnome.gnome-disk-utility
@@ -161,6 +153,7 @@
     google-chrome
     chrome-gnome-shell
     firefox
+    youtube-dl
     thunderbird
     filezilla
 
@@ -212,6 +205,12 @@
     gimp
     gitAndTools.gitFull
     python3
+    python310Packages.virtualenv
+    python310Packages.pyspark
+    python310Packages.numpy
+    python310Packages.pandas
+    python310Packages.poetry
+    spark
     glances
     gcc
     ctags
@@ -237,6 +236,7 @@
     chiaki
     retroarchFull
     playonlinux
+    dolphin-emu
 
     # Others
     glxinfo
@@ -260,12 +260,16 @@
     kubectx
     helmfile
     kubectl
+    kubelogin
     k9s
     pssh
 
+    # Emulation
+    lutris
+
     # Editors
-    emacs27
-    emacs27Packages.nix-mode
+    emacs
+    emacsPackages.nix-mode
     vim
 
     # Virtualization
@@ -286,15 +290,20 @@
     openvpn
     patchelf
     pdftk
+    qrencode
 
     # Printers
     gutenprint
     gutenprintBin
-    saneBackends
+    sane-backends
+
+    # kindle
+    #koreader
 
     # DB
     dbeaver
     mariadb-client
+    postgresql
 
     # Fun
     fortune
@@ -302,12 +311,12 @@
     wesnoth-dev
     docker-compose
     docker-machine
-    sshfsFuse
+    sshfs-fuse
     skopeo
 
     # command line nouveau
     lsd
-    ag
+    silver-searcher
     ack
     mosh
     bat
@@ -354,15 +363,11 @@
     gron
     ripgrep-all
     thefuck
-    
+
     # install ifuse
     ideviceinstaller
     ifuse
     libimobiledevice
-
-    # poetry, python package manager
-    poetry
-
   ];
 
   # Also install dev versions
@@ -421,13 +426,7 @@
   networking.firewall.enable = false;
 
   # Enable sound.
-  sound.enable = true;
-  hardware.pulseaudio = {
-    enable = true;
-    extraModules = [ pkgs.pulseaudio-modules-bt ];
-    package = pkgs.pulseaudioFull;
-    support32Bit = true;
-  };
+  #sound.enable = true;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -439,7 +438,7 @@
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "21.11"; # Did you read the comment?
+  system.stateVersion = "22.11"; # Did you read the comment?
 
   system.autoUpgrade.enable = false;
   system.autoUpgrade.allowReboot = false;
@@ -452,20 +451,52 @@
 
   programs.steam.enable = true;
 
+  hardware.pulseaudio.enable = false;
+  hardware.bluetooth.enable = true;
+  # rtkit is optional but recommended
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    # If you want to use JACK applications, uncomment this
+    #jack.enable = true;
+    config.pipewire = {
+      "context.properties" = {
+        #"link.max-buffers" = 64;
+        "link.max-buffers" = 16; # version < 3 clients can't handle more than this
+        "log.level" = 2; # https://docs.pipewire.org/page_daemon.html
+        #"default.clock.rate" = 48000;
+        #"default.clock.quantum" = 1024;
+        #"default.clock.min-quantum" = 32;
+        #"default.clock.max-quantum" = 8192;
+      };
+    };
+  };
+  environment.etc = {
+    "wireplumber/bluetooth.lua.d/51-bluez-config.lua".text = ''
+        bluez_monitor.properties = {
+            ["bluez5.enable-sbc-xq"] = true,
+            ["bluez5.enable-msbc"] = true,
+            ["bluez5.enable-hw-volume"] = true,
+            ["bluez5.headset-roles"] = "[ hsp_hs hsp_ag hfp_hf hfp_ag ]"
+        }
+    '';
+  };
+
   # Enable firmware updates
   services.fwupd.enable = true;
 
   # NVIDIA
-  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.beta;
-  hardware.nvidia.modesetting.enable = true;
-  hardware.nvidia.powerManagement.enable = true;
-  hardware.opengl.driSupport32Bit = true;
+  hardware.opengl.enable = true;
+  hardware.nvidia.prime = {
+    offload.enable = true;
+    # Bus ID of the Intel GPU. You can find it using lspci, either under 3D or VGA
+    intelBusId = "PCI:0:2:0";
 
-  # Add virtualbox and docker
-  virtualisation = {
-    virtualbox.host.enable = true;
-    libvirtd.enable = true;
-    podman.enable = true;
+    # Bus ID of the NVIDIA GPU. You can find it using lspci, either under 3D or VGA
+    nvidiaBusId = "PCI:1:0:0";
   };
 
   services.fprintd.enable = true;
