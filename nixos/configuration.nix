@@ -54,7 +54,7 @@
 
   # Disable explicitely use networkManager instead
   networking.useDHCP = false;
- 
+
   # Set your time zone.
   time.timeZone = "Europe/Paris";
 
@@ -425,9 +425,6 @@
   # Or disable the firewall altogether.
   networking.firewall.enable = false;
 
-  # Enable sound.
-  #sound.enable = true;
-
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -451,39 +448,8 @@
 
   programs.steam.enable = true;
 
-  hardware.pulseaudio.enable = false;
+  hardware.pulseaudio.enable = true;
   hardware.bluetooth.enable = true;
-  # rtkit is optional but recommended
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-    config.pipewire = {
-      "context.properties" = {
-        #"link.max-buffers" = 64;
-        "link.max-buffers" = 16; # version < 3 clients can't handle more than this
-        "log.level" = 2; # https://docs.pipewire.org/page_daemon.html
-        #"default.clock.rate" = 48000;
-        #"default.clock.quantum" = 1024;
-        #"default.clock.min-quantum" = 32;
-        #"default.clock.max-quantum" = 8192;
-      };
-    };
-  };
-  environment.etc = {
-    "wireplumber/bluetooth.lua.d/51-bluez-config.lua".text = ''
-        bluez_monitor.properties = {
-            ["bluez5.enable-sbc-xq"] = true,
-            ["bluez5.enable-msbc"] = true,
-            ["bluez5.enable-hw-volume"] = true,
-            ["bluez5.headset-roles"] = "[ hsp_hs hsp_ag hfp_hf hfp_ag ]"
-        }
-    '';
-  };
 
   # Enable firmware updates
   services.fwupd.enable = true;
