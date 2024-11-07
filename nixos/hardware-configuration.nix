@@ -11,6 +11,11 @@
   boot.initrd.kernelModules = [ "kvm-intel" ];
   boot.kernelModules = [ ];
   boot.extraModulePackages = [ ];
+  boot.blacklistedKernelModules = [ "snd_hda_intel" "snd_soc_skl" ];
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/b85606ed-9c49-49e8-84b3-748e0f81388b";
+      fsType = "ext4";
+    };
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/96ceed18-99c6-443c-86ad-6979a4aa4a51";

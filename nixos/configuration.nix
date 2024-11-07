@@ -3,25 +3,36 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 { config, lib, pkgs, modulesPath, ... }:
 {
+
   # Options for Lenovo ThinkPad X1 Gen 3
   imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
     ./users.nix
     ./kill-all-docker-containers.nix
+    ./cachix.nix
   ];
+
+  nix = {
+    package = pkgs.nixVersions.stable;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+      extra-sandbox-paths = /var/cache/ccache
+    '';
+  };
+
+
+  # disable a bunch of gnome junk apps, gnome-calculator, gedit, etc...
+  services.gnome.core-utilities.enable = false;
 
   # Enable graphical login and desktop
   services = {
     xserver = {
       enable = true;
-      layout = "us";
-      xkbVariant = "intl";
-      xkbOptions = "eurosign:e";
+      # layout = "us";
+      # xkbVariant = "intl";
+      # xkbOptions = "eurosign:e";
       # NVIDIA Optimusprime
       videoDrivers = [ "nvidia" ];
-      # NVIDIA Bumblebee
-      #videoDrivers = [ "nvidia" ];
-      #deviceSection = ''BusID "PCI:0:2:0"'';
       enableCtrlAltBackspace = true;
       desktopManager.gnome.enable = true;
       displayManager.gdm.enable = true;
@@ -29,13 +40,23 @@
     };
   };
 
+  fonts.fontconfig = { enable = true; };
+  # Add micro$oft fonts
+  fonts.packages = with pkgs; [
+    corefonts
+    nerdfonts
+  ];
+
+  services.acpid.enable = true;
+
   boot = {
     initrd.availableKernelModules = [ "battery" ];
     kernelModules = [ "acpi_call" ];
     extraModulePackages = with config.boot.kernelPackages; [ acpi_call ];
-    # extraModprobeConfig = ''
-    #   options snd-intel-dspcfg dsp_driver=1
-    # '';
+    kernelParams = [ "psmouse.synaptics_intertouch=0" ];
+    #extraModprobeConfig = ''
+    #  options snd-intel-dspcfg dsp_driver=1
+    #'';
   };
 
   boot.kernel.sysctl = {
@@ -47,21 +68,25 @@
   services.throttled.enable = lib.mkDefault true;
   hardware.trackpoint.device = "TPPS/2 Elan TrackPoint";
 
+
   services.tlp.enable = false;
 
   # Accept non free packages, needed for skype, zoom, unrar, etc...
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.cudaSupport = false;
 
   # Disable explicitely use networkManager instead
   networking.useDHCP = false;
 
   # Set your time zone.
-  time.timeZone = "Europe/Paris";
+  #time.timeZone = "Europe/Paris";
 
   # browserpass
   programs.browserpass.enable = true;
-  nixpkgs.config.firefox.enableBrowserpass = true;
-  nixpkgs.config.firefox.enableGnomeExtensions = true;
+  programs.firefox.nativeMessagingHosts.browserpass = true;
+  programs.firefox.nativeMessagingHosts.packages = [ pkgs.browserpass pkgs.gnome-browser-connector ];
+  # Needed for browserpass to call gnupg
+  programs.gnupg.agent.enable = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -73,7 +98,8 @@
     nodejs
     nodePackages.prettier
     nodePackages.eslint
-    telepresence2
+    nodePackages.create-react-app
+    #telepresence2
 
     # Non free, need allowUnfree set to true
     zoom-us
@@ -83,6 +109,14 @@
     # Nix utils
     nix-prefetch-scripts
     nix-zsh-completions
+    nix-tree
+
+    # gnome tools
+    nautilus
+    gnome-terminal
+
+    # Wii backup
+    wiimms-iso-tools
 
     # Monitoring
     psmisc
@@ -91,11 +125,17 @@
     htop
     gtop
     usbutils
+    libusb1
+    zlib
     iotop
     stress
     tcpdump
+    #wireshark
     lsof
     pciutils
+
+    #paraview
+    #openfoam11
 
     # Files
     meld
@@ -107,15 +147,25 @@
     p7zip
     unrar
 
+    # CUDA GPU NVIDIA
+    # cudatoolkit
+
     # Java
     maven
+    yarn
     jdk
+
+    # usb drives, disks, boot
+    refind
+    grub2
+    gptfdisk
 
     # Password store
     pass
 
     # Command line extra
     bc
+    mpg123
     ffmpeg
     hping
     iftop
@@ -124,6 +174,7 @@
     zsh
     tmux
     ranger
+    ansible
     # ranger previews
     libcaca   # video
     jellyfin  # homemade netflix
@@ -133,27 +184,28 @@
     poppler   # PDF
     poppler_utils
     mediainfo # audio and video
+    alsa-utils
     lingot    # guitar tuner
     pciutils
+    audacity
 
     # Gnome stuff
-    gnome.gnome-disk-utility
-    gnome.gnome-shell
-    gnome.gnome-shell-extensions
-    gnome.gnome-tweaks
     audio-recorder
+    gnomeExtensions.system-monitor-next
     gnomeExtensions.gsconnect
     gettext
     libgtop
     gir-rs
     rake
     kazam
+    texlive.combined.scheme-full
 
     # Web
     google-chrome
-    chrome-gnome-shell
     firefox
-    youtube-dl
+    browserpass
+    gnome-browser-connector
+    yt-dlp
     thunderbird
     filezilla
 
@@ -167,7 +219,6 @@
     hunspellDicts.en_US-large
 
     # Message and RSS
-    gnome3.polari
     liferea
 
     # Media
@@ -178,7 +229,13 @@
 
     # Utils
     git-cola
+    bfg-repo-cleaner
     gitg
+    git-lfs
+    openapi-generator-cli
+
+    # ssh
+    dropbear
 
     # storage
     ntfs3g
@@ -195,27 +252,33 @@
     mkpasswd
     pinentry
 
+    # Python packages
+    ( python3.withPackages(ps: with ps;
+      [
+        pyusb
+      ]
+    ))
+
     # Graphic tools
     xorg.xkill
     gcolor3
     graphviz
     imagemagick
     inkscape
-    libreoffice
+    #libreoffice
     gimp
     gitAndTools.gitFull
-    python3
-    python310Packages.virtualenv
-    python310Packages.pyspark
-    python310Packages.numpy
-    python310Packages.pandas
-    python310Packages.poetry
-    spark
+    go
+    ruff
+    poetry
     glances
     gcc
+    valgrind
+    clang
     ctags
     gnumake
     wget
+    sbt-with-scala-native
     cmake
     gdb
     direnv
@@ -225,7 +288,7 @@
 
     # Cloud stuff
     awscli2
-    google-cloud-sdk-gce
+    (google-cloud-sdk.withExtraComponents [google-cloud-sdk.components.gke-gcloud-auth-plugin])
     rclone
     azure-cli
 
@@ -233,53 +296,39 @@
     bluez
 
     # Games
-    chiaki
-    retroarchFull
-    playonlinux
-    dolphin-emu
+    #retroarchFull
+    #wine64
 
     # Others
-    glxinfo
+    #glxinfo
     gparted
     skopeo
 
     # PDF
-    xournal
     xournalpp
 
     # Security
     openssl
 
     # Gtk
-    transmission-gtk
+    transmission_4-gtk
 
     # Day to day use in Ryax
     cachix
     kubernetes-helm
-    popeye
+    kind
     kubectx
     helmfile
     kubectl
     kubelogin
-    k9s
-    pssh
-
-    # Emulation
-    lutris
 
     # Editors
     emacs
     emacsPackages.nix-mode
     vim
 
-    # Virtualization
-    #virtualbox
-
     # Canon drivers
     canon-cups-ufr2
-
-    # Web Site
-    hugo
 
     # Misc
     cloc
@@ -295,24 +344,15 @@
     # Printers
     gutenprint
     gutenprintBin
-    sane-backends
-
-    # kindle
-    #koreader
 
     # DB
-    dbeaver
-    mariadb-client
     postgresql
 
     # Fun
     fortune
     sl
     wesnoth-dev
-    docker-compose
-    docker-machine
     sshfs-fuse
-    skopeo
 
     # command line nouveau
     lsd
@@ -370,17 +410,11 @@
     libimobiledevice
   ];
 
-  # Also install dev versions
-  environment.extraOutputsToInstall = [ "dev" ];
-
   networking.extraHosts =
   ''
-    10.161.1.235 Canonceecf2.local
-    192.168.68.119 HP947F89.local
-    40.69.34.58 keycloak-uaa-01
-    192.168.68.107 BRW485F9938749C.local
+    10.50.1.235 Canon.local Canonceecf2.local Canon_MF642C_643C_644C_de_ed_f5_de_ed_f5_de_ed_de_ed_f5
+    127.0.0.1 myfakedomain.local
   '';
-
 
   programs.light.enable = true;
 
@@ -391,8 +425,10 @@
     enable = true;
     enableOnBoot = true;
     extraOptions = "--insecure-registry ryax-registry.ryaxns:5000";
-    enableNvidia = true;
   };
+  # enable gpu on docker
+  hardware.nvidia-container-toolkit.enable = true;
+
 
   # Avoid journald to store GigaBytes of logs
   services.journald.extraConfig = ''
@@ -402,22 +438,10 @@
   # Needed by ideviceX
   services.usbmuxd.enable = true;
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
-
   programs.ssh.forwardX11 = true;
 
   # Enable singularity
   programs.singularity.enable = true;
-
-  # List services that you want to enable:
-  services.printing.enable = true;
-  services.printing.drivers = [ pkgs.gutenprint ];
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
@@ -429,41 +453,87 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Avoid nix-daemon to use more than 50% of memory
+  # OOM configuration:
+  systemd = {
+    # Create a separate slice for nix-daemon that is
+    # memory-managed by the userspace systemd-oomd killer
+    slices."nix-daemon".sliceConfig = {
+      ManagedOOMMemoryPressure = "kill";
+      ManagedOOMMemoryPressureLimit = "50%";
+    };
+    services."nix-daemon".serviceConfig.Slice = "nix-daemon.slice";
+
+    # If a kernel-level OOM event does occur anyway,
+    # strongly prefer killing nix-daemon child processes
+    services."nix-daemon".serviceConfig.OOMScoreAdjust = 1000;
+  };
+
   networking.hostName = "lenovo-nixos";
 
+  # With flake we do things differently to upgrade:
+  # 1) go to /etc/nixos/flake.nix
+  # 2) edit file change the nixos-xx.yy version
+  # 3) sudo nix flake update
+  # 4) sudo nixos-rebuild --flake /etc/nixos/#lenovo-nixos switch --upgrade
+  # 5) Optionally update firmwares:
+  #    sudo fwupdmgr refresh ; sudo fwupdmgr get-updates
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "22.11"; # Did you read the comment?
+  system.stateVersion = "24.05"; # Did you read the comment?
 
-  system.autoUpgrade.enable = false;
-  system.autoUpgrade.allowReboot = false;
+  system.autoUpgrade.enable = true;
+  system.autoUpgrade.allowReboot = true;
 
   users.extraGroups.vboxusers.members = [ "velho" ];
 
-  services.avahi = {
-    enable = true;
-  };
+  # List services that you want to enable:
+  services.fprintd.enable = false;
+  services.printing.enable = true;
+  services.printing.drivers = [ pkgs.gutenprint pkgs.cnijfilter2 ];
 
+  services.avahi.enable = true;
+  services.avahi.nssmdns4 = true;
+  services.avahi.openFirewall = true;
+
+  system.nssModules = with pkgs.lib; optional (!config.services.avahi.nssmdns4) pkgs.nssmdns;
+  system.nssDatabases.hosts = with pkgs.lib; optionals (!config.services.avahi.nssmdns4) (mkMerge [
+    (mkOrder 900 [ "mdns4_minimal [NOTFOUND=return]" ]) # must be before resolve
+    (mkOrder 1501 [ "mdns4" ]) # 1501 to ensure it's after dns
+  ]);
+
+  # Enable steam client
   programs.steam.enable = true;
-
-  hardware.pulseaudio.enable = true;
-  hardware.bluetooth.enable = true;
 
   # Enable firmware updates
   services.fwupd.enable = true;
 
   # NVIDIA
-  hardware.opengl.enable = true;
+  #hardware.graphics.enable = true;
+  hardware.nvidia.open = true;
   hardware.nvidia.prime = {
     offload.enable = true;
     # Bus ID of the Intel GPU. You can find it using lspci, either under 3D or VGA
     intelBusId = "PCI:0:2:0";
-
     # Bus ID of the NVIDIA GPU. You can find it using lspci, either under 3D or VGA
     nvidiaBusId = "PCI:1:0:0";
   };
 
-  services.fprintd.enable = true;
+  # rtkit is optional but recommended
+  security.rtkit.enable = true;
+
+  # Sound
+  nixpkgs.config.pulseaudio = false;
+  hardware.pulseaudio.enable = false;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    jack.enable = true;
+  };
+
 }
+
