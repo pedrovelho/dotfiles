@@ -1,11 +1,14 @@
+(setq debug-on-error t)
+
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+
 
 ; If your are having problems finding your package call refresh below
 ;(package-refresh-contents)
 
 ; list the packages you want
-(setq package-list '(nix-mode yaml-mode python-mode markdown-mode))
+(setq package-list '(yaml-mode python-mode markdown-mode))
 
 ; install the missing packages
 (dolist (package package-list)
@@ -45,8 +48,8 @@
   (setq-local css-indent-offset n) ; css-mode
   (setq-local python-mode-indent-offset n) ; css-mode
   (setq-local yaml-mode-indent-offset n) ; yaml-mode
-  (setq-local markdown-mode-indent-offset n) ; css-mode
-  (setq-local nix-mode-indent-offset n) ; css-mode
+  (setq-local markdown-mode-indent-offset n) ; md-mode
+  (setq-local nix-mode-indent-offset n) ; nix-mode
   )
 
 ;; Use 2 spaces instead of tabs

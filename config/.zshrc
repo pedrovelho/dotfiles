@@ -35,7 +35,6 @@ tmux-main() {
 
     # test if no session is opened
     if [ $? -ne 0 ]; then
-    	echo "No current tmux session detected, initializing new"
     	tmux-custom-split
 	sleep 2
     fi
@@ -46,7 +45,7 @@ alias tmux-list="tmux list-session"
 alias tmux-kill="tmux kill-session -t"
 alias tmux-atta="tmux attach-session -t"
 alias ls='lsd'
-alias cat='bat'
+#alias cat='bat'
 alias du='dust'
 eval $(thefuck --alias)
 
@@ -62,13 +61,11 @@ exit() {
     fi
 }
 
-# if tmux is not defined open a tmux-main session
-if [[ -z $TMUX ]]; then
-    # tmux-main
-    echo "Run tmux-main to start a tmux-session 4x4 split screen!"
-fi
-
 export PATH=~/.local/bin:$PATH
+
+# Make spark work on nix
+export SPARK_HOME="/run/current-system/sw"
+
 
 # Configure default nodejs version for all sessions
 # nvm use 10.16.1
@@ -137,3 +134,23 @@ nix-clean () {
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+export PATH=~/.bin:$PATH
+
+alias start-jellyfin="docker run --name jellyfin --rm -p 8096:8096 -v /home/velho/varzia/jellyfin/jellyfin-config:/config -v /home/velho/varzia/jellyfin/jellyfin-library:/media -v /home/velho/varzia/jellyfin/jellyfin-cache:/cache docker.io/linuxserver/jellyfin:10.9.4"
+#alias start-jellyfin="docker run --name jellyfin --rm -p 8096:8096 -v /home/velho/varzia/jellyfin/jellyfin-config:/config -v /home/velho/varzia/jellyfin/jellyfin-library:/data   velho/jellyfin"
+
+export LD_LIBRARY_PATH=$(dirname $(gcc -print-file-name=libstdc++.so.6))
+
+alias pixelborn='/home/velho/nvidia-offload.sh wine64 /home/velho/Games/Pixelborn/Pixelborn.exe'
+
+# Tested with ====>
+
+# /home/velho/nvidia-offload.sh glxinfo | grep "OpenGL renderer"
+# OpenGL renderer string: NVIDIA GeForce GTX 1650 Ti with Max-Q Design/PCIe/SSE2
+
+# glxinfo | grep "OpenGL renderer"
+# OpenGL renderer string: Mesa Intel(R) UHD Graphics (CML GT2)
+
+alias nvidia-offload='/home/velho/nvidia-offload.sh'
+alias gpu-offload='/home/velho/nvidia-offload.sh'
