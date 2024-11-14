@@ -2,6 +2,15 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 { config, lib, pkgs, modulesPath, ... }:
+let
+  nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
+    export __NV_PRIME_RENDER_OFFLOAD=1
+    export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export __VK_LAYER_NV_optimus=NVIDIA_only
+    exec "$@"
+  '';
+in
 {
 
   # Options for Lenovo ThinkPad X1 Gen 3
@@ -88,6 +97,10 @@
   # Needed for browserpass to call gnupg
   programs.gnupg.agent.enable = true;
 
+  environment.variables = {
+    GSK_RENDERER = "ngl";
+  };
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -149,6 +162,8 @@
 
     # CUDA GPU NVIDIA
     # cudatoolkit
+    # enable nvidia-offload script
+    nvidia-offload
 
     # Java
     maven
@@ -300,7 +315,7 @@
     #wine64
 
     # Others
-    #glxinfo
+    glxinfo
     gparted
     skopeo
 
@@ -424,6 +439,7 @@
   virtualisation.docker = {
     enable = true;
     enableOnBoot = true;
+    enableNvidia = true;
     extraOptions = "--insecure-registry ryax-registry.ryaxns:5000";
   };
   # enable gpu on docker
