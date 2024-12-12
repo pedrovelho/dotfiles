@@ -114,6 +114,10 @@ in
     nodePackages.create-react-app
     #telepresence2
 
+
+    # Nice to have
+    fastfetch
+
     # Non free, need allowUnfree set to true
     zoom-us
     unrar
@@ -147,7 +151,7 @@ in
     lsof
     pciutils
 
-    #paraview
+    paraview
     #openfoam11
 
     # Files
@@ -197,6 +201,7 @@ in
     atool     # archives
     w3m       # web
     poppler   # PDF
+    evince
     poppler_utils
     mediainfo # audio and video
     alsa-utils
@@ -280,7 +285,7 @@ in
     graphviz
     imagemagick
     inkscape
-    #libreoffice
+    libreoffice
     gimp
     gitAndTools.gitFull
     go
@@ -439,7 +444,6 @@ in
   virtualisation.docker = {
     enable = true;
     enableOnBoot = true;
-    enableNvidia = true;
     extraOptions = "--insecure-registry ryax-registry.ryaxns:5000";
   };
   # enable gpu on docker

@@ -39,7 +39,7 @@ URxvt.font: xft:UbuntuMono Nerd Font:size=13, \
             xft:FuraMono Nerd Font:size=13, \
             xft:RobotoMono Nerd Font:size=13, \
             xft:Noto Sans Mono:size=13, \
-            xft:Monospace:style=Medium:size=13   
+            xft:Monospace:style=Medium:size=13
 URxvt.saveLines: 2000
 URxvt.scrollBar: false
 URxvt.cursorColor: white
@@ -65,46 +65,88 @@ URxvt.keysym.M-v: perl:clipboard:paste
 URxvt*depth: 32
 
 
+! Panda for Xresources terminals
+! Support: https://github.com/SuddenGunter
+! Based on https://github.com/PandaTheme/panda-terminal
+! Converted via http://terminal.sexy
+
+! special
+*.foreground:   #f3f3f3
+*.background:   #1f1f20
+*.cursorColor:  #f3f3f3
+
+! black
+*.color0:       #2a2d32
+*.color8:       #2a2d32
+
+! red
+*.color1:       #ff276d
+*.color9:       #ff276d
+
+! green
+*.color2:       #00ffdb
+*.color10:      #00ffdb
+
+! yellow
+*.color3:       #ffb863
+*.color11:      #ffb863
+
+! blue
+*.color4:       #6cb1ff
+*.color12:      #6cb1ff
+
+! magenta
+*.color5:       #b184ef
+*.color13:      #b184ef
+
+! cyan
+*.color6:       #67d3c2
+*.color14:      #67d3c2
+
+! white
+*.color7:       #f3f3f3
+*.color15:      #f3f3f0
+
 ! Dracula Xresources palette
 !! COLORS
 
 ! special
-URxvt*foreground:   ##292d3e
-URxvt*background:   #bbc5ff
-URxvt*cursorColor:  #292d3e
+! URxvt*foreground:   ##292d3e
+! URxvt*background:   #bbc5ff
+! URxvt*cursorColor:  #292d3e
 
-XTerm*foreground: #bbc5ff
-XTerm*background: #292d3e
-XTerm*cursorColor: #bbc5ff
+! XTerm*foreground: #bbc5ff
+! XTerm*background: #292d3e
+! XTerm*cursorColor: #bbc5ff
 
-! black
-*.color0:       #101010
-*.color8:       #434758
+! ! black
+! *.color0:       #101010
+! *.color8:       #434758
 
-! red
-*.color1:       #f07178
-*.color9:       #ff8b92
+! ! red
+! *.color1:       #f07178
+! *.color9:       #ff8b92
 
-! green
-*.color2:       #c3e88d
-*.color10:      #ddffa7
+! ! green
+! *.color2:       #c3e88d
+! *.color10:      #ddffa7
 
-! yellow
-*.color3:       #ffcb6b
-*.color11:      #ffe585
+! ! yellow
+! *.color3:       #ffcb6b
+! *.color11:      #ffe585
 
-! blue
-*.color4:       #82aaff
-*.color12:      #9cc4ff
+! ! blue
+! *.color4:       #82aaff
+! *.color12:      #9cc4ff
 
-! magenta
-*.color5:       #c792ea
-*.color13:      #e1acff
+! ! magenta
+! *.color5:       #c792ea
+! *.color13:      #e1acff
 
-! cyan
-*.color6:       #89ddff
-*.color14:      #a3f7ff
+! ! cyan
+! *.color6:       #89ddff
+! *.color14:      #a3f7ff
 
-! white
-*.color7:       #d0d0d0
-*.color15:      #ffffff
+! ! white
+! *.color7:       #d0d0d0
+! *.color15:      #ffffff

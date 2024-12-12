@@ -11,6 +11,7 @@ ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
 plugins=(git)
 plugins+=(kubectl)
 plugins+=(tmux)
+plugins+=(nix-shell)
 
 source ~/.oh-my-zsh/oh-my-zsh.sh
 
@@ -27,6 +28,9 @@ tmux-custom-split () {
     tmux split-window -d -t 0 -p 50 -v
     tmux split-window -d -t 0 -p 50 -h
     tmux split-window -d -t 2 -p 50 -h
+
+    # launch fancy fastfetch on top left
+    #tmux send -t main-0:0.0 "fastfetch" C-m
 }
 
 tmux-main() {
