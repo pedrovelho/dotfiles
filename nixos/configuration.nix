@@ -32,6 +32,8 @@ in
 
   # disable a bunch of gnome junk apps, gnome-calculator, gedit, etc...
   services.gnome.core-utilities.enable = false;
+  # diable gnome-keyring use only gnupg agent
+  services.gnome.gnome-keyring.enable = lib.mkForce false;
 
   # Enable graphical login and desktop
   services = {
@@ -167,7 +169,7 @@ in
     # CUDA GPU NVIDIA
     # cudatoolkit
     # enable nvidia-offload script
-    nvidia-offload
+    #nvidia-offload
 
     # Java
     maven
@@ -279,6 +281,10 @@ in
       ]
     ))
 
+    # Jupyter
+    jupyter
+
+
     # Graphic tools
     xorg.xkill
     gcolor3
@@ -345,6 +351,9 @@ in
     # Editors
     emacs
     emacsPackages.nix-mode
+    emacsPackages.ts
+    emacsPackages.tree-sitter
+    emacsPackages.tree-sitter-langs
     vim
 
     # Canon drivers
@@ -531,14 +540,21 @@ in
   services.fwupd.enable = true;
 
   # NVIDIA
-  #hardware.graphics.enable = true;
-  hardware.nvidia.open = true;
-  hardware.nvidia.prime = {
-    offload.enable = true;
-    # Bus ID of the Intel GPU. You can find it using lspci, either under 3D or VGA
-    intelBusId = "PCI:0:2:0";
-    # Bus ID of the NVIDIA GPU. You can find it using lspci, either under 3D or VGA
-    nvidiaBusId = "PCI:1:0:0";
+  hardware.graphics.enable = true;
+  hardware.nvidia = {
+    open = false;
+    modesetting.enable = true;
+    powerManagement.enable = true;
+    powerManagement.finegrained = true;
+    nvidiaSettings = true;
+
+    prime = {
+      offload.enable = true;
+      # Bus ID of the Intel GPU. You can find it using lspci, either under 3D or VGA
+      intelBusId = "PCI:0:2:0";
+      # Bus ID of the NVIDIA GPU. You can find it using lspci, either under 3D or VGA
+      nvidiaBusId = "PCI:1:0:0";
+    };
   };
 
   # rtkit is optional but recommended

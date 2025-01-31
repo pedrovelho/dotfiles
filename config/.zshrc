@@ -123,6 +123,7 @@ zstyle ':completion:*' menu select
 fpath+=~/.zfunc
 
 export KUBE_EDITOR=emacs
+export EDITOR=emacs
 
 nix-clean () {
   nix-env --delete-generations old
@@ -141,8 +142,7 @@ nix-clean () {
 
 export PATH=~/.bin:$PATH
 
-alias start-jellyfin="docker run --name jellyfin --rm -p 8096:8096 -v /home/velho/varzia/jellyfin/jellyfin-config:/config -v /home/velho/varzia/jellyfin/jellyfin-library:/media -v /home/velho/varzia/jellyfin/jellyfin-cache:/cache docker.io/linuxserver/jellyfin:10.9.4"
-#alias start-jellyfin="docker run --name jellyfin --rm -p 8096:8096 -v /home/velho/varzia/jellyfin/jellyfin-config:/config -v /home/velho/varzia/jellyfin/jellyfin-library:/data   velho/jellyfin"
+alias start-jellyfin="docker run --name jellyfin --rm -p 8096:8096 -v /home/velho/varzia/jellyfin/jellyfin-config:/config -v /home/velho/varzia/jellyfin/jellyfin-library:/media -v /home/velho/varzia/jellyfin/jellyfin-cache:/cache docker.io/linuxserver/jellyfin:latest"
 
 export LD_LIBRARY_PATH=$(dirname $(gcc -print-file-name=libstdc++.so.6))
 
@@ -158,3 +158,15 @@ alias pixelborn='/home/velho/nvidia-offload.sh wine64 /home/velho/Games/Pixelbor
 
 alias nvidia-offload='/home/velho/nvidia-offload.sh'
 alias gpu-offload='/home/velho/nvidia-offload.sh'
+
+
+alias kube-clean="kubectl get pods --all-namespaces | grep -E OutOfcpu\|Evicted\|Completed\|OOMKilled\|Error\|ContainerStatusUnknown | awk '{print \"kubectl delete pod \" $2 \" -n \" $1 }' | bash"
+
+# Get password for registry
+alias ryax-get-registry-pass="kubectl get secret -n ryaxns ryax-registry-creds-secret -o yaml | yq -r '.data.\".dockerconfigjson\"' | base64 -d | jq -r '.auths.\"registry.meprecisa.ryax.io\".auth' | base64 -d | cut -d: -f2 | cut -d% -f1"
+
+# Get disk usage on internal registry
+alias ryax-df-registry="kubectl exec -ti -n ryaxns \$(kubectl get pods -n ryaxns --selector=\"ryax.tech/resource-name\"=registry -o=name -o yaml | yq -r \".items[0].metadata.name\") -- df -h /var/lib/registry"
+
+# Manually call garbage collector for registry
+alias ryax-gb-registry="kubectl exec -ti -n ryaxns \$(kubectl get pods -n ryaxns --selector=\"ryax.tech/resource-name\"=registry -o=name -o yaml | yq -r \".items[0].metadata.name\") -- /bin/registry garbage-collect --delete-untagged /etc/docker/registry/config.yml"
